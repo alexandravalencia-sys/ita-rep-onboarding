@@ -10,13 +10,13 @@ const BRAND = {
 };
 
 // Public assets you should upload to /public in Next.js
-// - /lexvoyage-logo-dark.png (dark green on white)
-// - /lexvoyage-logo-light.png (white on transparent)
-// - /lexvoyage-mark.png (round monogram)
+// - /3_noBG.png (dark green on white)
+// - /LEXVOYAGE_logo_white_transparent.png (white on transparent)
+// - /Logo_LEXVOYAGE_transparent.png (round monogram)
 const LOGOS = {
-  dark: "/lexvoyage-logo-dark.png",
-  light: "/lexvoyage-logo-light.png",
-  mark: "/lexvoyage-mark.png",
+  dark: "/3_noBG.png",
+  light: "/LEXVOYAGE_logo_white_transparent.png",
+  mark: "/Logo_LEXVOYAGE_transparent.png",
 };
 
 const PLANNET_LINK = "https://www.plannetmarketing.com/alexy";
