@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo, useState, useEffect } from "react";
 
 // Simple utility components
@@ -70,7 +71,7 @@ function TickItem({ children }) {
 const PLANNET_LINK = "https://www.plannetmarketing.com/alexy";
 const WHATSAPP_LINK = "https://wa.me/447857047339"; // intl format without + for wa.me
 const CALENDLY_LINK = "https://calendly.com/alexandravalencia-";
-const CONTACT_EMAIL = "alexandravalencia.traveladvisor@gmail.com"; // NOTE: replace with a real email if needed
+const CONTACT_EMAIL = "alexandravalencia.traveladvisor@gmail.com";
 
 const benefits = [
   {
