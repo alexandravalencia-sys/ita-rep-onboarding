@@ -225,8 +225,7 @@ export default function App() {
           <Card>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-bold" style={{color: BRAND.green}}>Benefits of becoming an ITA</h3>
-              <CopyText label="Copy perks" text={benefits.map(b => `• ${b.title} — ${b.desc}`).join("
-")} />
+              <CopyText label="Copy perks" text={benefits.map(b => `• ${b.title} — ${b.desc}`).join("\n")} />
             </div>
             <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 list-none mt-3">
               {benefits.map((b, i) => (
