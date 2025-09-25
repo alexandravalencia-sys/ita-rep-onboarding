@@ -103,26 +103,53 @@ export default function App() {
   const total = 6;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [showErrors, setShowErrors] = useState(false);
+  const [leadSent, setLeadSent] = useState(false);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("itaRepWizard") || "{}");
-    if (saved.step) setStep(saved.step);
-    if (saved.name) setName(saved.name);
-    if (saved.email) setEmail(saved.email);
-  }, []);
-  useEffect(() => {
-    localStorage.setItem("itaRepWizard", JSON.stringify({ step, name, email }));
-  }, [step, name, email]);
+   const saved = JSON.parse(localStorage.getItem("itaRepWizard") || "{}");
+   if (saved.step) setStep(saved.step);
+   if (saved.name) setName(saved.name);
+   if (saved.email) setEmail(saved.email);
+   if (saved.phone) setPhone(saved.phone);
+   if (saved.leadSent) setLeadSent(true);
+}, []);
+
+useEffect(() => {
+  localStorage.setItem(
+    "itaRepWizard",
+    JSON.stringify({ step, name, email, phone, leadSent })
+  );
+}, [step, name, email, phone, leadSent]);
 
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-  const canProceed = step !== 1 || (name.trim().length > 1 && emailOk);
+  const phoneOk = phone.replace(/[^\d+]/g, "").length >= 7; // simple check
+  const canProceed = step !== 1 || (name.trim().length > 1 && emailOk && phoneOk);
 
-  const next = () => {
-    if (step === 1 && !canProceed) { setShowErrors(true); return; }
-    setShowErrors(false);
-    setStep((s) => Math.min(total, s + 1));
-  };
+const next = async () => {
+  if (step === 1 && !canProceed) { setShowErrors(true); return; }
+
+  // Send lead once
+  if (step === 1 && !leadSent) {
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, phone, sourceStep: 1 }),
+      });
+      if (res.ok) {
+        setLeadSent(true);
+      } else {
+        console.warn("Lead send failed", await res.json());
+      }
+    } catch (e) {
+      console.warn("Lead send error", e);
+    }
+  }
+  setShowErrors(false);
+  setStep((s) => Math.min(total, s + 1));
+};
 
   const StepHeader = ({ title, subtitle }) => (
     <div className="mb-4">
@@ -138,7 +165,9 @@ export default function App() {
               onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1}>← Back</button>
       <div className="flex items-center gap-2">
         <button className="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50" onClick={() => setStep(1)}>Start again</button>
-        <CTA onClick={next} disabled={!canProceed}>{step === total ? "Finish" : "Next →"}</CTA>
+        <CTA onClick={next} disabled={!canProceed}>
+         {step === total ? "Finish" : "Next →"}
+        </CTA>
       </div>
     </div>
   );
@@ -161,33 +190,40 @@ export default function App() {
         </div>
 
         {/* Progress + Required details */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-          <Card className="lg:col-span-2"><Progress step={step} total={total} /></Card>
-          <Card>
-            <div className="space-y-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="text-sm font-medium">Your name *</label>
-                  <input className="w-full rounded-xl border border-gray-300 px-3 py-2 mt-1"
-                         placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-                  {showErrors && name.trim().length <= 1 && (
-                    <p className="text-xs text-red-600 mt-1">Please enter your name.</p>
-                  )}
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Email *</label>
-                  <input className="w-full rounded-xl border border-gray-300 px-3 py-2 mt-1"
-                         type="email" placeholder="name@email.com"
-                         value={email} onChange={(e) => setEmail(e.target.value)} />
-                  {showErrors && !emailOk && (
-                    <p className="text-xs text-red-600 mt-1">Please enter a valid email.</p>
-                  )}
-                </div>
-              </div>
-              <div className="text-xs text-gray-500">We’ll save this locally so you can continue later.</div>
-            </div>
-          </Card>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+         <div>
+          <label className="text-sm font-medium">Your name *</label>
+          <input className="w-full rounded-xl border border-gray-300 px-3 py-2 mt-1"
+           placeholder="Full name" value={name} onChange={(e)=>setName(e.target.value)} />
+    {showErrors && name.trim().length <= 1 && (
+      <p className="text-xs text-red-600 mt-1">Please enter your name.</p>
+    )}
+  </div>
+  <div>
+    <label className="text-sm font-medium">Email *</label>
+    <input className="w-full rounded-xl border border-gray-300 px-3 py-2 mt-1"
+           type="email" placeholder="name@email.com"
+           value={email} onChange={(e)=>setEmail(e.target.value)} />
+    {showErrors && !emailOk && (
+      <p className="text-xs text-red-600 mt-1">Please enter a valid email.</p>
+    )}
+  </div>
+  <div>
+    <label className="text-sm font-medium">Phone *</label>
+    <input className="w-full rounded-xl border border-gray-300 px-3 py-2 mt-1"
+           placeholder="+44 7…"
+           value={phone} onChange={(e)=>setPhone(e.target.value)} />
+    {showErrors && !phoneOk && (
+      <p className="text-xs text-red-600 mt-1">Please enter a valid phone.</p>
+    )}
+  </div>
+</div>
+
+<div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
+  <span>We’ll save this locally so you can continue later.</span>
+  {leadSent && <span className="text-emerald-700">Lead sent ✓</span>}
+</div>
+
 
         {/* Benefits */}
         <div className="mb-8">
