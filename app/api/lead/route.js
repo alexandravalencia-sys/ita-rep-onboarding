@@ -34,7 +34,7 @@ export async function POST(req) {
           <li><b>Time (UTC):</b> ${new Date().toISOString()}</li>
         </ul>`;
       await resend.emails.send({
-        from: "LEXVOYAGE <notify@yourdomain.com>", // use a domain you verify in Resend
+        from: "LEXVOYAGE <onboarding@resend.dev>", // use a domain you verify in Resend
         to: [toEmail],
         subject: "New ITA/Rep enrolment started",
         html,
